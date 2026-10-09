@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Demo Gestione Turni · Nicora Garden Case Study | Davide Braghiroli</title>
+    <meta name="description" content="Guarda come Nicora Garden organizza 25 collaboratori su 2 sedi in 1 click senza fogli Excel." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-dark: #020f11;
+        --bg-card: #011b1e;
+        --border-color: rgba(45, 212, 191, 0.2);
+        --accent-emerald: #10b981;
+        --accent-glow: #34d399;
+        --text-main: #f8fafc;
+        --text-sub: #94a3b8;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        background-image: 
+          radial-gradient(circle at 50% 10%, #053b3f 0%, #01181a 50%, #000a0b 100%),
+          linear-gradient(to right, rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
+        background-size: 100% 100%, 60px 60px, 60px 60px;
+        color: var(--text-main);
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px 60px 16px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Container */
+      .app-wrapper {
+        width: 100%;
+        max-width: 1080px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      /* Header Pill */
+      .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 999px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-glow);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-emerald);
+        box-shadow: 0 0 10px var(--accent-emerald);
+      }
+
+      /* Headline */
+      .page-headline {
+        font-size: clamp(24px, 4vw, 38px);
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        max-width: 780px;
+      }
+
+      .highlight {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Player Card */
+      .player-container {
+        position: relative;
+        width: 100%;
+        border-radius: 18px;
+        background: #000c0e;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.1);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Orientation-based sizing */
+      /* Desktop / Landscape default: 16:9 */
+      @media (min-width: 768px) and (orientation: landscape) {
+        .player-container {
+          max-width: 960px;
+          aspect-ratio: 16 / 9;
+        }
+      }
+
+      /* Mobile Portrait: 9:16 */
+      @media (max-width: 767px), (orientation: portrait) {
+        .player-container {
+          max-width: 440px;
+          aspect-ratio: 9 / 16;
+        }
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* Sound Toggle Floating Button */
+      .audio-pill {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        padding: 10px 18px;
+        background: rgba(2, 26, 29, 0.9);
+        border: 1px solid rgba(52, 211, 153, 0.5);
+        border-radius: 999px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        transition: transform 0.2s, background 0.2s;
+        z-index: 30;
+      }
+      .audio-pill:hover {
+        transform: scale(1.05);
+        background: rgba(2, 38, 42, 0.95);
+      }
+
+      /* Info & Highlights Section */
+      .details-section {
+        width: 100%;
+        max-width: 840px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        margin-top: 10px;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        width: 100%;
+      }
+
+      .feature-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .feature-box svg {
+        color: var(--accent-emerald);
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .feature-text strong {
+        display: block;
+        font-size: 16px;
+        color: #ffffff;
+        margin-bottom: 4px;
+      }
+
+      .feature-text p {
+        font-size: 14px;
+        color: var(--text-sub);
+        line-height: 1.4;
+      }
+
+      /* Call To Action Buttons */
+      .cta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        justify-content: center;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 28px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        border: none;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(16, 185, 129, 0.4);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      /* Footer */
+      footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--text-sub);
+      }
+      footer strong {
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <!-- Badge -->
+      <div class="header-badge">
+        <div class="pulse"></div>
+        <span>Caso Reale · Garden & Retail</span>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="page-headline">
+        Gestione Turni Nicora Garden: <br class="hidden-mobile">
+        <span class="highlight">243 Turni Mensili in 1 Click.</span>
+      </h1>
+
+      <!-- Adaptive Video Player -->
+      <div class="player-container">
+        <button id="audio-toggle" class="audio-pill" onclick="toggleAudio()">
+          <span id="audio-icon">🔇</span>
+          <span id="audio-label">Tocca per audio</span>
+        </button>
+
+        <video
+          id="main-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+        >
+          <!-- Source populated dynamically via JavaScript based on orientation/screen -->
+        </video>
+      </div>
+
+      <!-- Key Benefits -->
+      <div class="details-section">
+        <div class="features-grid">
+          <div class="feature-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <div class="feature-text">
+              <strong>Generazione Automatica 1-Click</strong>
+              <p>Calcolo vincolato dei riposi settimanali e rispetto delle ore contrattuali.</p>
+            </div>
+          </div>
+
+          <div class="feature-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            <div class="feature-text">
+              <strong>Accesso Smartphone con PIN</strong>
+              <p>Ogni collaboratore vede i propri turni sul telefono senza installare nulla.</p>
+            </div>
+          </div>
+
+          <div class="feature-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <div class="feature-text">
+              <strong>Zero Fogli Excel Spersi</strong>
+              <p>Piattaforma cloud Supabase sincronizzata in tempo reale su tutte le sedi.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to actions -->
+        <div class="cta-bar">
+          <a class="btn btn-primary" href="mailto:davide@braghiroli.it?subject=Richiesta%20Informazioni%20Gestione%20Turni">
+            ✉️ Richiedi una demo per la tua azienda
+          </a>
+          <a class="btn btn-secondary" href="https://wa.me/393452296178?text=Ciao%20Davide,%20ho%20visto%20il%20video%20della%20gestione%20turni%20e%20vorrei%20saperne%20di%20più" target="_blank" rel="noopener">
+            💬 Scrivimi su WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <footer>
+        Progettato e sviluppato da <strong>Davide Braghiroli</strong> · Soluzioni Software su Misura
+      </footer>
+    </div>
+
+    <!-- Responsive Video Switching Script -->
+    <script>
+      const video = document.getElementById('main-video');
+      const audioBtn = document.getElementById('audio-toggle');
+      const audioIcon = document.getElementById('audio-icon');
+      const audioLabel = document.getElementById('audio-label');
+
+      let currentFormat = null;
+
+      function updateVideoSource() {
+        // Check if device is portrait (smartphone upright) or landscape (desktop/tablet wide)
+        const isPortrait = window.matchMedia("(orientation: portrait)").matches || window.innerWidth < 768;
+        const targetFormat = isPortrait ? 'vertical' : 'landscape';
+
+        if (currentFormat !== targetFormat) {
+          currentFormat = targetFormat;
+          const currentTime = video.currentTime || 0;
+          const wasPlaying = !video.paused;
+
+          if (isPortrait) {
+            video.src = 'brag-vertical.mp4';
+            video.poster = 'brag-vertical.jpg';
+          } else {
+            video.src = 'brag.mp4';
+            video.poster = 'brag.jpg';
+          }
+
+          video.currentTime = currentTime;
+          if (wasPlaying) {
+            video.play().catch(() => {});
+          }
+        }
+      }
+
+      // Initial check
+      updateVideoSource();
+
+      // Listen for rotation / resize
+      window.addEventListener('resize', updateVideoSource);
+      if (window.screen && window.screen.orientation) {
+        window.screen.orientation.addEventListener('change', updateVideoSource);
+      }
+
+      // Audio Toggle Button
+      function toggleAudio() {
+        if (video.muted) {
+          video.muted = false;
+          video.volume = 1;
+          audioIcon.textContent = '🔊';
+          audioLabel.textContent = 'Audio attivo';
+          setTimeout(() => {
+            audioBtn.style.opacity = '0.4';
+          }, 2000);
+        } else {
+          video.muted = true;
+          audioIcon.textContent = '🔇';
+          audioLabel.textContent = 'Tocca per audio';
+          audioBtn.style.opacity = '1';
+        }
+      }
+
+      audioBtn.addEventListener('mouseenter', () => {
+        audioBtn.style.opacity = '1';
+      });
+      audioBtn.addEventListener('mouseleave', () => {
+        if (!video.muted) audioBtn.style.opacity = '0.4';
+      });
+    </script>
+  </body>
+</html>
